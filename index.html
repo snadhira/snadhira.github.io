@@ -5,12 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nadhira — Personal Site</title>
   <meta name="description" content="Nadhira's personal corner of the web. Notes, projects, and things I'm building. Hosted on GitHub Pages.">
-  <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#0c0a09">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d9488'/%3E%3Ctext x='32' y='44' font-family='system-ui,sans-serif' font-size='36' font-weight='700' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+  <script>
+    try { if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+  </script>
   <style>
     :root {
-      color-scheme: light dark;
+      color-scheme: dark;
+      --bg: #0c0a09;
+      --surface: #171514;
+      --text: #f5f5f4;
+      --muted: #a8a29e;
+      --faint: #57534e;
+      --accent: #2dd4bf;
+      --accent-strong: #5eead4;
+      --border: #292524;
+      --glow: rgba(45, 212, 191, 0.10);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+    }
+
+    :root.light {
+      color-scheme: light;
       --bg: #fafaf9;
       --surface: #ffffff;
       --text: #1c1917;
@@ -21,21 +37,6 @@
       --border: #e7e5e4;
       --glow: rgba(13, 148, 136, 0.14);
       --shadow: 0 1px 2px rgba(28, 25, 23, 0.04), 0 8px 24px -12px rgba(28, 25, 23, 0.12);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0c0a09;
-        --surface: #171514;
-        --text: #f5f5f4;
-        --muted: #a8a29e;
-        --faint: #57534e;
-        --accent: #2dd4bf;
-        --accent-strong: #5eead4;
-        --border: #292524;
-        --glow: rgba(45, 212, 191, 0.10);
-        --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
-      }
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -69,7 +70,7 @@
 
     a { color: var(--accent-strong); text-decoration: none; }
     a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-    a:focus-visible, .btn:focus-visible {
+    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
       border-radius: 6px;
@@ -109,6 +110,37 @@
     }
 
     .header-link:hover { color: var(--accent-strong); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+      color: var(--accent-strong);
+      background: var(--surface);
+      border-color: var(--border);
+    }
+
+    .theme-toggle .icon-moon { display: none; }
+    .light .theme-toggle .icon-sun { display: none; }
+    .light .theme-toggle .icon-moon { display: block; }
 
     /* ---------- Hero ---------- */
     .hero {
@@ -193,16 +225,14 @@
     .btn.primary {
       background: var(--accent-strong);
       border-color: var(--accent-strong);
-      color: #ffffff;
+      color: #042f2e;
     }
 
     .btn.primary:hover {
       background: color-mix(in srgb, var(--accent-strong) 88%, black);
     }
 
-    @media (prefers-color-scheme: dark) {
-      .btn.primary, .btn.primary:hover { color: #042f2e; }
-    }
+    .light .btn.primary, .light .btn.primary:hover { color: #ffffff; }
 
     .btn svg { flex-shrink: 0; }
 
@@ -323,7 +353,18 @@
   <header class="site-header">
     <div class="wrap">
       <a class="wordmark" href="#top">Nadhira</a>
-      <a class="header-link" href="https://github.com/snadhira">GitHub ↗</a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <a class="header-link" href="https://github.com/snadhira">GitHub ↗</a>
+      </div>
     </div>
   </header>
 
@@ -396,7 +437,26 @@
   </footer>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('theme-toggle');
+
+      function apply(theme) {
+        var light = theme === 'light';
+        root.classList.toggle('light', light);
+        btn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+      }
+
+      apply(root.classList.contains('light') ? 'light' : 'dark');
+
+      btn.addEventListener('click', function () {
+        var next = root.classList.contains('light') ? 'dark' : 'light';
+        apply(next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
   </script>
 </body>
 </html>
