@@ -70,7 +70,7 @@
 
     a { color: var(--accent-strong); text-decoration: none; }
     a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible, .cell:focus-visible {
+    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible, .letter:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
       border-radius: 6px;
@@ -284,43 +284,62 @@
     }
 
     /* ---------- Game ---------- */
-    .game-board {
+    .abc-board {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
       gap: 0.5rem;
-      width: min(100%, 17rem);
+      width: min(100%, 22rem);
       margin-top: 1.75rem;
     }
 
-    .cell {
+    .letter {
       aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0;
       font-family: inherit;
-      font-size: 2.25rem;
-      font-weight: 700;
-      line-height: 1;
+      font-size: 1.0625rem;
+      font-weight: 600;
       color: var(--text);
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 0.75rem;
+      border-radius: 0.625rem;
       cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
     }
 
-    .cell:hover:not(:disabled) { border-color: var(--accent); }
+    .letter:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent-strong);
+    }
 
-    .cell:disabled { cursor: default; }
-    .cell.x { color: var(--accent-strong); }
-    .cell.o { color: #d97757; }
+    .letter:disabled { cursor: default; }
+
+    .letter.done {
+      color: var(--faint);
+      background: transparent;
+      border-color: transparent;
+      opacity: 0.55;
+    }
+
+    .letter.wrong {
+      border-color: #d97757;
+      color: #d97757;
+    }
 
     .game-status {
       margin: 1.5rem 0 0;
       min-height: 1.65em;
       font-weight: 500;
       color: var(--text);
+    }
+
+    .game-timer {
+      margin: 0.25rem 0 0;
+      min-height: 1.4em;
+      font-size: 0.875rem;
+      color: var(--faint);
     }
 
     .game-actions { margin-top: 1rem; }
@@ -417,24 +436,15 @@
 
     <section id="game" class="wrap">
       <span class="section-label">Game</span>
-      <h2>Tic-tac-toe</h2>
+      <h2>Alphabet game</h2>
       <p>
-        You are X and the computer is O. You go first.
+        Click the letters from A to Z in order. The timer starts with A.
       </p>
-      <div class="game-board" aria-label="Tic-tac-toe board">
-        <button class="cell" type="button" aria-label="Row 1, column 1: empty"></button>
-        <button class="cell" type="button" aria-label="Row 1, column 2: empty"></button>
-        <button class="cell" type="button" aria-label="Row 1, column 3: empty"></button>
-        <button class="cell" type="button" aria-label="Row 2, column 1: empty"></button>
-        <button class="cell" type="button" aria-label="Row 2, column 2: empty"></button>
-        <button class="cell" type="button" aria-label="Row 2, column 3: empty"></button>
-        <button class="cell" type="button" aria-label="Row 3, column 1: empty"></button>
-        <button class="cell" type="button" aria-label="Row 3, column 2: empty"></button>
-        <button class="cell" type="button" aria-label="Row 3, column 3: empty"></button>
-      </div>
-      <p class="game-status" id="game-status" aria-live="polite">Your turn.</p>
+      <div class="abc-board" id="abc-board" aria-label="Alphabet board"></div>
+      <p class="game-status" id="game-status" aria-live="polite">Find A to start.</p>
+      <p class="game-timer" id="game-timer" aria-hidden="true"></p>
       <div class="game-actions">
-        <button class="btn" id="game-reset" type="button">New game</button>
+        <button class="btn" id="game-reset" type="button">Shuffle</button>
       </div>
     </section>
 
@@ -482,100 +492,84 @@
   </script>
   <script>
     (function () {
-      var board = ['', '', '', '', '', '', '', '', ''];
-      var cells = Array.prototype.slice.call(document.querySelectorAll('.cell'));
+      var boardEl = document.getElementById('abc-board');
       var statusEl = document.getElementById('game-status');
+      var timerEl = document.getElementById('game-timer');
       var resetBtn = document.getElementById('game-reset');
-      var lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-      var over = false;
-      var humanTurn = true;
+      var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      var next = 0;
+      var misses = 0;
+      var startTime = 0;
+      var tick = null;
+      var finished = false;
 
-      function result(b) {
-        for (var i = 0; i < lines.length; i++) {
-          var l = lines[i];
-          if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return b[l[0]];
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
         }
-        return b.indexOf('') === -1 ? 'draw' : null;
+        return a;
       }
 
-      function render() {
-        cells.forEach(function (el, i) {
-          var mark = board[i];
-          el.textContent = mark;
-          el.className = 'cell' + (mark ? ' ' + mark.toLowerCase() : '');
-          el.disabled = over || !humanTurn || !!mark;
-          el.setAttribute('aria-label', 'Row ' + (Math.floor(i / 3) + 1) + ', column ' + (i % 3 + 1) + (mark ? ': ' + mark : ': empty'));
+      function format(ms) { return (ms / 1000).toFixed(1) + 's'; }
+
+      function updateTimer() {
+        if (startTime) timerEl.textContent = 'Time: ' + format(Date.now() - startTime);
+      }
+
+      function stopTimer() {
+        if (tick) { clearInterval(tick); tick = null; }
+      }
+
+      function pick(ch, btn) {
+        if (finished || btn.disabled) return;
+        var expected = letters[next];
+        if (ch !== expected) {
+          misses++;
+          btn.classList.add('wrong');
+          setTimeout(function () { btn.classList.remove('wrong'); }, 300);
+          return;
+        }
+        if (!startTime) {
+          startTime = Date.now();
+          tick = setInterval(updateTimer, 100);
+        }
+        btn.classList.add('done');
+        btn.disabled = true;
+        next++;
+        if (next === letters.length) {
+          finished = true;
+          stopTimer();
+          timerEl.textContent = '';
+          statusEl.textContent = 'Done in ' + format(Date.now() - startTime) + '. Misses: ' + misses + '.';
+          return;
+        }
+        updateTimer();
+        statusEl.textContent = 'Find ' + letters[next] + '.';
+      }
+
+      function build() {
+        stopTimer();
+        next = 0;
+        misses = 0;
+        startTime = 0;
+        finished = false;
+        statusEl.textContent = 'Find A to start.';
+        timerEl.textContent = '';
+        boardEl.innerHTML = '';
+        shuffle(letters.slice()).forEach(function (ch) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'letter';
+          btn.textContent = ch;
+          btn.setAttribute('aria-label', 'Letter ' + ch);
+          btn.addEventListener('click', function () { pick(ch, btn); });
+          boardEl.appendChild(btn);
         });
       }
 
-      function finish(res) {
-        over = true;
-        statusEl.textContent = res === 'X' ? 'You win.' : res === 'O' ? 'Computer wins.' : 'Draw.';
-        render();
-      }
-
-      function check() {
-        var res = result(board);
-        if (res) finish(res);
-        return !!res;
-      }
-
-      function findLine(mark) {
-        for (var i = 0; i < lines.length; i++) {
-          var l = lines[i];
-          var mine = 0, blanks = 0, blank = -1;
-          for (var j = 0; j < 3; j++) {
-            if (board[l[j]] === mark) mine++;
-            else if (!board[l[j]]) { blanks++; blank = l[j]; }
-          }
-          if (mine === 2 && blanks === 1) return blank;
-        }
-        return null;
-      }
-
-      function aiMove() {
-        if (over) return;
-        var empty = [];
-        board.forEach(function (m, i) { if (!m) empty.push(i); });
-        if (!empty.length) { check(); return; }
-
-        var choice = findLine('O');
-        if (choice === null) choice = findLine('X');
-        if (choice === null && !board[4]) choice = 4;
-        if (choice === null) {
-          var corners = [0, 2, 6, 8].filter(function (i) { return !board[i]; });
-          var pool = corners.length ? corners : empty;
-          choice = pool[Math.floor(Math.random() * pool.length)];
-        }
-
-        board[choice] = 'O';
-        if (check()) return;
-        humanTurn = true;
-        statusEl.textContent = 'Your turn.';
-        render();
-      }
-
-      cells.forEach(function (el, i) {
-        el.addEventListener('click', function () {
-          if (over || !humanTurn || board[i]) return;
-          board[i] = 'X';
-          if (check()) return;
-          humanTurn = false;
-          statusEl.textContent = 'Computer is thinking.';
-          render();
-          setTimeout(aiMove, 350);
-        });
-      });
-
-      resetBtn.addEventListener('click', function () {
-        board = ['', '', '', '', '', '', '', '', ''];
-        over = false;
-        humanTurn = true;
-        statusEl.textContent = 'Your turn.';
-        render();
-      });
-
-      render();
+      resetBtn.addEventListener('click', build);
+      build();
     })();
   </script>
 </body>
