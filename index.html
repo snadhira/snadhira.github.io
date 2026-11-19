@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nadhira — Personal Site</title>
-  <meta name="description" content="Nadhira's personal corner of the web. Notes, projects, and things I'm building. Hosted on GitHub Pages.">
+  <title>Nadhira</title>
+  <meta name="description" content="Personal site of Nadhira. Notes, projects, and experiments, hosted on GitHub Pages.">
   <meta name="theme-color" content="#0c0a09">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d9488'/%3E%3Ctext x='32' y='44' font-family='system-ui,sans-serif' font-size='36' font-weight='700' fill='white' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
   <script>
@@ -70,7 +70,7 @@
 
     a { color: var(--accent-strong); text-decoration: none; }
     a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible {
+    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible, .cell:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
       border-radius: 6px;
@@ -147,30 +147,6 @@
       padding-block: clamp(3.5rem, 12vh, 7rem) clamp(3rem, 10vh, 6rem);
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0 0 1.5rem;
-      padding: 0.375rem 0.875rem;
-      font-size: 0.8125rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      color: var(--accent-strong);
-      background: color-mix(in srgb, var(--accent) 10%, transparent);
-      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-      border-radius: 999px;
-    }
-
-    .eyebrow::before {
-      content: "";
-      width: 0.4375rem;
-      height: 0.4375rem;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-    }
-
     h1 {
       margin: 0 0 1.25rem;
       font-size: clamp(2.75rem, 9vw, 4.25rem);
@@ -178,13 +154,6 @@
       letter-spacing: -0.035em;
       font-weight: 800;
       text-wrap: balance;
-    }
-
-    h1 .name {
-      background: linear-gradient(100deg, var(--accent-strong), var(--accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
     }
 
     .lede {
@@ -295,20 +264,9 @@
     }
 
     .card .card-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
       font-weight: 600;
       font-size: 1.0625rem;
     }
-
-    .card .card-title .arrow {
-      color: var(--accent-strong);
-      transition: transform 0.18s ease;
-    }
-
-    .card:hover .card-title .arrow { transform: translate(2px, -2px); }
 
     .card .card-desc {
       margin: 0;
@@ -324,6 +282,48 @@
       gap: 0.75rem;
       margin-top: 1.5rem;
     }
+
+    /* ---------- Game ---------- */
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      width: min(100%, 17rem);
+      margin-top: 1.75rem;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .cell:hover:not(:disabled) { border-color: var(--accent); }
+
+    .cell:disabled { cursor: default; }
+    .cell.x { color: var(--accent-strong); }
+    .cell.o { color: #d97757; }
+
+    .game-status {
+      margin: 1.5rem 0 0;
+      min-height: 1.65em;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .game-actions { margin-top: 1rem; }
 
     /* ---------- Footer ---------- */
     .site-footer {
@@ -363,18 +363,17 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
         </button>
-        <a class="header-link" href="https://github.com/snadhira">GitHub ↗</a>
+        <a class="header-link" href="https://github.com/snadhira">GitHub</a>
       </div>
     </div>
   </header>
 
   <main id="top">
     <section class="hero wrap">
-      <p class="eyebrow">Welcome to my corner of the web</p>
-      <h1>Hi, I'm <span class="name">Nadhira</span>.</h1>
+      <h1>Hi, I'm Nadhira.</h1>
       <p class="lede">
-        This is my personal site — a quiet place for notes, projects, and the
-        things I'm building. Hand-written in HTML, hosted on GitHub Pages.
+        This is my personal site. I keep notes, projects, and links to things I
+        find interesting here. It is plain HTML, hosted on GitHub Pages.
       </p>
       <div class="actions">
         <a class="btn primary" href="https://github.com/snadhira">
@@ -383,7 +382,7 @@
           </svg>
           GitHub
         </a>
-        <a class="btn" href="#about">More about me ↓</a>
+        <a class="btn" href="#about">More about me</a>
       </div>
     </section>
 
@@ -391,28 +390,51 @@
       <span class="section-label">About</span>
       <h2>A little about this place</h2>
       <p>
-        I'm <strong>Nadhira</strong>. This site is small on purpose — it's a
-        starting point I can grow over time, with room for writing, experiments,
-        and links to things I find interesting.
+        I'm <strong>Nadhira</strong>. This site is small on purpose. It gives me
+        a place to grow over time, with room for writing, experiments, and links
+        to things I find interesting.
       </p>
       <p>
-        Everything here is plain HTML and CSS. No frameworks, no build step —
-        just a page that loads fast and works everywhere.
+        Everything here is plain HTML and CSS. There is no framework and no
+        build step, so the page loads fast and works everywhere.
       </p>
     </section>
 
     <section id="work" class="wrap">
       <span class="section-label">Selected work</span>
-      <h2>Where to find my stuff</h2>
+      <h2>Projects and links</h2>
       <div class="cards">
         <a class="card" href="https://github.com/snadhira">
-          <span class="card-title">GitHub <span class="arrow" aria-hidden="true">↗</span></span>
-          <p class="card-desc">Code, experiments, and works in progress. The most up-to-date place to see what I'm tinkering with.</p>
+          <span class="card-title">GitHub</span>
+          <p class="card-desc">Code, experiments, and works in progress. This is the most up-to-date place to see what I'm tinkering with.</p>
         </a>
         <a class="card" href="https://github.com/snadhira/snadhira.github.io">
-          <span class="card-title">This site <span class="arrow" aria-hidden="true">↗</span></span>
-          <p class="card-desc">The source for this page — a deliberately simple HTML document, served by GitHub Pages.</p>
+          <span class="card-title">This site</span>
+          <p class="card-desc">The source for this page. It is a single HTML file served by GitHub Pages.</p>
         </a>
+      </div>
+    </section>
+
+    <section id="game" class="wrap">
+      <span class="section-label">Game</span>
+      <h2>Tic-tac-toe</h2>
+      <p>
+        You are X and the computer is O. You go first.
+      </p>
+      <div class="game-board" aria-label="Tic-tac-toe board">
+        <button class="cell" type="button" aria-label="Row 1, column 1: empty"></button>
+        <button class="cell" type="button" aria-label="Row 1, column 2: empty"></button>
+        <button class="cell" type="button" aria-label="Row 1, column 3: empty"></button>
+        <button class="cell" type="button" aria-label="Row 2, column 1: empty"></button>
+        <button class="cell" type="button" aria-label="Row 2, column 2: empty"></button>
+        <button class="cell" type="button" aria-label="Row 2, column 3: empty"></button>
+        <button class="cell" type="button" aria-label="Row 3, column 1: empty"></button>
+        <button class="cell" type="button" aria-label="Row 3, column 2: empty"></button>
+        <button class="cell" type="button" aria-label="Row 3, column 3: empty"></button>
+      </div>
+      <p class="game-status" id="game-status" aria-live="polite">Your turn.</p>
+      <div class="game-actions">
+        <button class="btn" id="game-reset" type="button">New game</button>
       </div>
     </section>
 
@@ -420,11 +442,11 @@
       <span class="section-label">Contact</span>
       <h2>Say hello</h2>
       <p>
-        The easiest way to reach me is on GitHub. I'm always happy to talk about
-        code, ideas, or anything worth building.
+        The easiest way to reach me is on GitHub. I'm happy to talk about code,
+        ideas, or anything worth building.
       </p>
       <div class="contact-links">
-        <a class="btn" href="https://github.com/snadhira">Find me on GitHub ↗</a>
+        <a class="btn" href="https://github.com/snadhira">Find me on GitHub</a>
       </div>
     </section>
   </main>
@@ -432,7 +454,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <span>© <span id="year">2026</span> Nadhira</span>
-      <span>Built with HTML · Hosted on <a href="https://pages.github.com">GitHub Pages</a></span>
+      <span>Built with HTML. Hosted on <a href="https://pages.github.com">GitHub Pages</a></span>
     </div>
   </footer>
 
@@ -456,6 +478,104 @@
       });
 
       document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+  <script>
+    (function () {
+      var board = ['', '', '', '', '', '', '', '', ''];
+      var cells = Array.prototype.slice.call(document.querySelectorAll('.cell'));
+      var statusEl = document.getElementById('game-status');
+      var resetBtn = document.getElementById('game-reset');
+      var lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+      var over = false;
+      var humanTurn = true;
+
+      function result(b) {
+        for (var i = 0; i < lines.length; i++) {
+          var l = lines[i];
+          if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return b[l[0]];
+        }
+        return b.indexOf('') === -1 ? 'draw' : null;
+      }
+
+      function render() {
+        cells.forEach(function (el, i) {
+          var mark = board[i];
+          el.textContent = mark;
+          el.className = 'cell' + (mark ? ' ' + mark.toLowerCase() : '');
+          el.disabled = over || !humanTurn || !!mark;
+          el.setAttribute('aria-label', 'Row ' + (Math.floor(i / 3) + 1) + ', column ' + (i % 3 + 1) + (mark ? ': ' + mark : ': empty'));
+        });
+      }
+
+      function finish(res) {
+        over = true;
+        statusEl.textContent = res === 'X' ? 'You win.' : res === 'O' ? 'Computer wins.' : 'Draw.';
+        render();
+      }
+
+      function check() {
+        var res = result(board);
+        if (res) finish(res);
+        return !!res;
+      }
+
+      function findLine(mark) {
+        for (var i = 0; i < lines.length; i++) {
+          var l = lines[i];
+          var mine = 0, blanks = 0, blank = -1;
+          for (var j = 0; j < 3; j++) {
+            if (board[l[j]] === mark) mine++;
+            else if (!board[l[j]]) { blanks++; blank = l[j]; }
+          }
+          if (mine === 2 && blanks === 1) return blank;
+        }
+        return null;
+      }
+
+      function aiMove() {
+        if (over) return;
+        var empty = [];
+        board.forEach(function (m, i) { if (!m) empty.push(i); });
+        if (!empty.length) { check(); return; }
+
+        var choice = findLine('O');
+        if (choice === null) choice = findLine('X');
+        if (choice === null && !board[4]) choice = 4;
+        if (choice === null) {
+          var corners = [0, 2, 6, 8].filter(function (i) { return !board[i]; });
+          var pool = corners.length ? corners : empty;
+          choice = pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        board[choice] = 'O';
+        if (check()) return;
+        humanTurn = true;
+        statusEl.textContent = 'Your turn.';
+        render();
+      }
+
+      cells.forEach(function (el, i) {
+        el.addEventListener('click', function () {
+          if (over || !humanTurn || board[i]) return;
+          board[i] = 'X';
+          if (check()) return;
+          humanTurn = false;
+          statusEl.textContent = 'Computer is thinking.';
+          render();
+          setTimeout(aiMove, 350);
+        });
+      });
+
+      resetBtn.addEventListener('click', function () {
+        board = ['', '', '', '', '', '', '', '', ''];
+        over = false;
+        humanTurn = true;
+        statusEl.textContent = 'Your turn.';
+        render();
+      });
+
+      render();
     })();
   </script>
 </body>
