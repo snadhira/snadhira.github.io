@@ -70,7 +70,7 @@
 
     a { color: var(--accent-strong); text-decoration: none; }
     a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible, .letter:focus-visible {
+    a:focus-visible, .btn:focus-visible, .theme-toggle:focus-visible, .letter:focus-visible, .tile:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 3px;
       border-radius: 6px;
@@ -342,7 +342,64 @@
       color: var(--faint);
     }
 
-    .game-actions { margin-top: 1rem; }
+    .game-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    /* ---------- Word game ---------- */
+    .tile-rack, .answer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .tile {
+      width: 2.75rem;
+      height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+    }
+
+    .tile:hover:not(:disabled) {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .tile:disabled { cursor: default; }
+    .tile.used { visibility: hidden; }
+    .tile.placed { color: var(--accent-strong); }
+
+    .slot {
+      width: 2.75rem;
+      height: 2.75rem;
+      border: 1px dashed var(--border);
+      border-radius: 0.5rem;
+    }
+
+    .answer-row.wrong .tile {
+      border-color: #d97757;
+      color: #d97757;
+    }
+
+    .word-hint {
+      font-style: italic;
+      color: var(--muted);
+    }
 
     /* ---------- Footer ---------- */
     .site-footer {
@@ -445,6 +502,23 @@
       <p class="game-timer" id="game-timer" aria-hidden="true"></p>
       <div class="game-actions">
         <button class="btn" id="game-reset" type="button">Shuffle</button>
+      </div>
+    </section>
+
+    <section id="word-game" class="wrap">
+      <span class="section-label">Word game</span>
+      <h2>Word tiles</h2>
+      <p>
+        Arrange the tiles into the Indonesian word for the hint. Click a tile
+        to place it, and click a placed tile to take it back.
+      </p>
+      <p class="word-hint" id="word-hint">Hint: apple</p>
+      <div class="tile-rack" id="tile-rack" aria-label="Letter tiles"></div>
+      <div class="answer-row" id="word-answer" aria-label="Your answer"></div>
+      <p class="game-status" id="word-status" aria-live="polite">Score: 0.</p>
+      <div class="game-actions">
+        <button class="btn" id="word-clear" type="button">Clear</button>
+        <button class="btn" id="word-new" type="button">New word</button>
       </div>
     </section>
 
@@ -570,6 +644,169 @@
 
       resetBtn.addEventListener('click', build);
       build();
+    })();
+  </script>
+  <script>
+    (function () {
+      var words = [
+        ['apel', 'apple'], ['buku', 'book'], ['kursi', 'chair'], ['meja', 'table'],
+        ['pintu', 'door'], ['jendela', 'window'], ['kucing', 'cat'], ['anjing', 'dog'],
+        ['burung', 'bird'], ['bunga', 'flower'], ['pohon', 'tree'], ['rumah', 'house'],
+        ['sekolah', 'school'], ['guru', 'teacher'], ['murid', 'student'], ['teman', 'friend'],
+        ['kakak', 'older sibling'], ['adik', 'younger sibling'], ['ayah', 'father'], ['ibu', 'mother'],
+        ['nasi', 'rice'], ['roti', 'bread'], ['susu', 'milk'], ['kopi', 'coffee'],
+        ['air', 'water'], ['laut', 'sea'], ['pantai', 'beach'], ['gunung', 'mountain'],
+        ['sungai', 'river'], ['hutan', 'forest'], ['jalan', 'road'], ['kota', 'city'],
+        ['desa', 'village'], ['mobil', 'car'], ['kapal', 'ship'], ['sepeda', 'bicycle'],
+        ['dokter', 'doctor'], ['polisi', 'police'], ['petani', 'farmer'], ['nelayan', 'fisherman'],
+        ['matahari', 'sun'], ['bintang', 'star'], ['bulan', 'moon'], ['langit', 'sky'],
+        ['awan', 'cloud'], ['hujan', 'rain'], ['angin', 'wind'], ['api', 'fire'],
+        ['batu', 'stone'], ['pasir', 'sand'], ['pulau', 'island'], ['tangan', 'hand'],
+        ['kepala', 'head'], ['mata', 'eye'], ['hidung', 'nose'], ['mulut', 'mouth'],
+        ['telinga', 'ear'], ['rambut', 'hair'], ['hati', 'heart'], ['ikan', 'fish'],
+        ['ayam', 'chicken'], ['sapi', 'cow'], ['kuda', 'horse'], ['ular', 'snake'],
+        ['gajah', 'elephant'], ['monyet', 'monkey'], ['semut', 'ant'], ['makan', 'eat'],
+        ['minum', 'drink'], ['tidur', 'sleep'], ['duduk', 'sit'], ['berlari', 'run'],
+        ['membaca', 'read'], ['menulis', 'write'], ['melihat', 'see'], ['bekerja', 'work'],
+        ['belajar', 'study'], ['bermain', 'play'], ['memasak', 'cook'], ['menyanyi', 'sing'],
+        ['menari', 'dance'], ['membeli', 'buy'], ['menjual', 'sell'], ['datang', 'come'],
+        ['pergi', 'go'], ['pulang', 'return'], ['masuk', 'enter'], ['keluar', 'exit'],
+        ['terbang', 'fly'], ['tertawa', 'laugh'], ['menangis', 'cry'], ['senang', 'happy'],
+        ['sedih', 'sad'], ['marah', 'angry'], ['takut', 'afraid'], ['lapar', 'hungry'],
+        ['haus', 'thirsty'], ['sakit', 'sick'], ['sehat', 'healthy'], ['besar', 'big'],
+        ['kecil', 'small'], ['tinggi', 'tall'], ['rendah', 'low'], ['panjang', 'long'],
+        ['pendek', 'short'], ['cepat', 'fast'], ['lambat', 'slow'], ['panas', 'hot'],
+        ['dingin', 'cold'], ['baru', 'new'], ['lama', 'long time'], ['muda', 'young'],
+        ['cantik', 'beautiful'], ['lucu', 'funny'], ['bersih', 'clean'], ['kotor', 'dirty'],
+        ['mudah', 'easy'], ['sulit', 'difficult'], ['benar', 'correct'], ['salah', 'wrong'],
+        ['jauh', 'far'], ['dekat', 'near'], ['mahal', 'expensive'], ['murah', 'cheap'],
+        ['putih', 'white'], ['hitam', 'black'], ['merah', 'red'], ['biru', 'blue'],
+        ['hijau', 'green'], ['kuning', 'yellow'], ['ungu', 'purple'], ['pagi', 'morning'],
+        ['siang', 'daytime'], ['sore', 'afternoon'], ['malam', 'night'], ['minggu', 'week'],
+        ['tahun', 'year'], ['uang', 'money'], ['pasar', 'market'], ['toko', 'shop'],
+        ['kantor', 'office'], ['taman', 'park'], ['bola', 'ball'], ['bahasa', 'language'],
+        ['negara', 'country'], ['dunia', 'world'], ['cinta', 'love'], ['maaf', 'sorry'],
+        ['selamat', 'congrats'], ['silakan', 'please'], ['terima', 'receive']
+      ];
+      var rackEl = document.getElementById('tile-rack');
+      var answerEl = document.getElementById('word-answer');
+      var hintEl = document.getElementById('word-hint');
+      var statusEl = document.getElementById('word-status');
+      var score = 0;
+      var word = '';
+      var tiles = [];
+      var placed = [];
+      var locked = false;
+
+      function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
+
+      function draw() {
+        rackEl.innerHTML = '';
+        tiles.forEach(function (tile) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'tile' + (tile.used ? ' used' : '');
+          b.textContent = tile.ch;
+          b.disabled = tile.used || locked;
+          b.setAttribute('aria-label', 'Letter ' + tile.ch);
+          b.addEventListener('click', function () { place(tile); });
+          rackEl.appendChild(b);
+        });
+
+        answerEl.classList.remove('wrong');
+        answerEl.innerHTML = '';
+        for (var i = 0; i < word.length; i++) {
+          if (placed[i]) {
+            var t = placed[i];
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tile placed';
+            btn.textContent = t.ch;
+            btn.disabled = locked;
+            btn.setAttribute('aria-label', 'Remove ' + t.ch);
+            btn.addEventListener('click', function () { unplace(t); });
+            answerEl.appendChild(btn);
+          } else {
+            var slot = document.createElement('span');
+            slot.className = 'slot';
+            slot.setAttribute('aria-hidden', 'true');
+            answerEl.appendChild(slot);
+          }
+        }
+      }
+
+      function place(tile) {
+        if (locked || tile.used) return;
+        tile.used = true;
+        placed.push(tile);
+        draw();
+        if (placed.length === word.length) check();
+      }
+
+      function unplace(tile) {
+        if (locked) return;
+        var i = placed.indexOf(tile);
+        if (i === -1) return;
+        placed.splice(i, 1);
+        tile.used = false;
+        draw();
+      }
+
+      function reset() {
+        placed = [];
+        tiles.forEach(function (t) { t.used = false; });
+        draw();
+      }
+
+      function check() {
+        var answer = placed.map(function (t) { return t.ch; }).join('');
+        locked = true;
+        draw();
+        if (answer === word) {
+          score++;
+          statusEl.textContent = 'Correct. Score: ' + score + '.';
+          setTimeout(start, 900);
+        } else {
+          answerEl.classList.add('wrong');
+          statusEl.textContent = 'Not quite. Try again.';
+          setTimeout(function () {
+            locked = false;
+            reset();
+          }, 700);
+        }
+      }
+
+      function start() {
+        locked = false;
+        placed = [];
+        var entry;
+        do {
+          entry = words[Math.floor(Math.random() * words.length)];
+        } while (word && entry[0] === word);
+        word = entry[0];
+        hintEl.textContent = 'Hint: ' + entry[1];
+        tiles = shuffle(word.split('')).map(function (ch) {
+          return { ch: ch, used: false };
+        });
+        statusEl.textContent = 'Score: ' + score + '.';
+        draw();
+      }
+
+      document.getElementById('word-clear').addEventListener('click', function () {
+        if (!locked) reset();
+      });
+
+      document.getElementById('word-new').addEventListener('click', function () {
+        if (!locked) start();
+      });
+
+      start();
     })();
   </script>
 </body>
